@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Hub | Generate API Key</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+   
+</head>
+<body>
+
+    <div class="container">
+        <div class="card">
+            <h1>Create API Access</h1>
+            <p class="subtitle">Generate kunci API aman Anda dan daftarkan akun untuk memulai integrasi.</p>
+    
+            <div class="form-group">
+                <label for="apiKeyInput">API Key (Generate first)</label>
+                <div class="input-wrapper">
+                    <input type="text" id="apiKeyInput" class="form-control" value="" readonly placeholder="Klik generate di bawah...">
+                    <button id="copyBtn" class="copy-btn-absolute">COPY</button>
+                </div>
+                <button id="generateBtn" class="btn btn-secondary">Generate New Key</button>
+            </div>
+    
+            <div class="divider"></div>
+
+            <div class="form-group">
+                <label for="firstNameInput">First Name</label>
+                <input type="text" id="firstNameInput" class="form-control" placeholder="Nama depan Anda">
+            </div>
+
+            <div class="form-group">
+                <label for="lastNameInput">Last Name <span style="font-weight:400; color: #64748b;">(Optional)</span></label>
+                <input type="text" id="lastNameInput" class="form-control" placeholder="Nama belakang Anda">
+            </div>
+    
+            <div class="form-group">
+                <label for="emailInput">Email Address</label>
+                <input type="email" id="emailInput" class="form-control" placeholder="nama@email.com">
+            </div>
+            
+            <button id="saveBtn" class="btn btn-primary" style="margin-top: 1rem;">Create Account</button>
+    
+            <div id="saveFeedback" class="feedback"></div>
+        </div>
+
+        <footer>
+            &copy; 2024 Kevinnadr System. All rights reserved.
+        </footer>
+    </div>
+
+    <script>
+        // --- LOGIC SAMA PERSIS (Copy Paste dari script Anda) ---
+        const generateBtn = document.getElementById('generateBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const firstNameInput = document.getElementById('firstNameInput');
+        const lastNameInput = document.getElementById('lastNameInput');
+        const emailInput = document.getElementById('emailInput');
+        const saveFeedback = document.getElementById('saveFeedback');
+
+        async function generateApiKey() {
+            generateBtn.disabled = true;
+            generateBtn.textContent = 'Generating...';
+            apiKeyInput.value = '...';
+            
+            try {
+                const response = await fetch('/generate-key', { method: 'POST' });
+                const data = await response.json();
+                if (data.apiKey) {
+                    apiKeyInput.value = data.apiKey;
+                    apiKeyInput.style.color = '#818cf8'; // Reset warna sukses
+                } else throw new Error('No key data');
+            } catch (error) {
+                console.error(error);
+                apiKeyInput.value = 'Error generating key';
+                apiKeyInput.style.color = '#ef4444';
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.textContent = 'Generate New Key';
+            }
+        }
+
+        function copyToClipboard() {
+            if (!apiKeyInput.value || apiKeyInput.value.includes('Error') || apiKeyInput.value.includes('...')) return;
+            navigator.clipboard.writeText(apiKeyInput.value);
+            
+            // Efek visual tombol copy
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = 'COPIED!';
+            copyBtn.style.color = '#10b981';
+            setTimeout(() => {
+                copyBtn.textContent = originalText;
+                copyBtn.style.color = '';
+            }, 2000);
+        }
+
+        async function saveUser() {
+            const apiKey = apiKeyInput.value;
+            const firstName = firstNameInput.value;
+            const lastName = lastNameInput.value;
+            const email = emailInput.value;
+
+            if (!apiKey || !firstName || !email || apiKey.includes('...')) {
+                showFeedback('Please fill in Name, Email & Generate Key.', 'error');
+                return;
+            }
+
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+            saveFeedback.textContent = '';
+            saveFeedback.className = 'feedback';
+
+            try {
+                const response = await fetch('/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ apiKey, firstName, lastName, email })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    showFeedback('Success! Account & Key Registered.', 'success');
+                    // Reset inputs
+                    apiKeyInput.value = '';
+                    firstNameInput.value = '';
+                    lastNameInput.value = '';
+                    emailInput.value = '';
+                } else {
+                    throw new Error(data.error || 'Failed to save');
+                }
+            } catch (error) {
+                showFeedback(error.message, 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Create Account';
+            }
+        }
+
+        function showFeedback(msg, type) {
+            saveFeedback.textContent = msg;
+            saveFeedback.className = `feedback ${type}`;
+        }
+
+        generateBtn.addEventListener('click', generateApiKey);
+        copyBtn.addEventListener('click', copyToClipboard);
+        saveBtn.addEventListener('click', saveUser);
+    </script>
+</body>
+</html>
