@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- VARIABLES --- */
+        :root {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --border-subtle: rgba(148, 163, 184, 0.1);
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --text-head: #f1f5f9;
+            --text-body: #94a3b8;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-body);
+            min-height: 100vh;
+        }
+
+        /* --- LAYOUT UTAMA --- */
+        .wrapper {
+            display: flex;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        /* --- AUTH CARD (Login/Register) --- */
+        .auth-container {
+            width: 100%;
+            max-width: 400px;
+            margin-top: 4rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- DASHBOARD WIDE CARD --- */
+        .dashboard-container {
+            width: 100%;
+            max-width: 1000px; /* Lebih lebar untuk tabel */
+        }
+
+        h1, h2, h3 {
+            color: var(--text-head);
+            margin-top: 0;
+            font-weight: 700;
+        }
+        h1 { font-size: 1.8rem; text-align: center; margin-bottom: 2rem; }
+        h2 { font-size: 1.5rem; }
+
+        /* --- FORM ELEMENTS --- */
+        .form-group { margin-bottom: 1.25rem; }
+        label { display: block; margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--text-head); }
+        
+        .form-control {
+            width: 100%;
+            background: #0f172a;
+            border: 1px solid var(--border-subtle);
+            color: #fff;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border 0.3s;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* --- BUTTONS --- */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        .btn:hover { background: var(--primary-hover); }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-head);
+        }
+        .btn-outline:hover { background: rgba(255,255,255,0.05); }
+
+        .btn-danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .btn-danger:hover { background: rgba(239, 68, 68, 0.3); }
+
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.85rem; width: auto; }
+
+        /* --- LINKS & FEEDBACK --- */
+        .toggle-link {
+            text-align: center; margin-top: 1.5rem; font-size: 0.9rem;
+            color: var(--primary); cursor: pointer;
+        }
+        .toggle-link:hover { text-decoration: underline; }
+        
+        .feedback { text-align: center; margin-top: 1rem; font-size: 0.9rem; min-height: 1.2em; }
+        .feedback.error { color: var(--danger); }
+        .feedback.success { color: var(--success); }
+
+        /* --- DASHBOARD HEADER --- */
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .action-bar button { flex: 1; }
+
+        /* --- TABLE STYLING --- */
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #1e293b;
+        }
+
+        th {
+            background: #28364b;
+            color: #fff;
+            text-align: left;
+            padding: 1rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 0.9rem;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: rgba(255,255,255,0.02); }
+
+        /* Code snippets inside table */
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #cbd5e1;
+            font-size: 0.85rem;
+        }
+
+        /* Status Badges */
+        .badge {
+            padding: 0.25rem 0.6rem;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-active { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .badge-inactive { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        
+        <div id="loginSection" class="auth-container">
+            <div class="card">
+                <h1>Admin Login</h1>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="adminEmail" class="form-control" placeholder="admin@domain.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="adminPassword" class="form-control" placeholder="••••••••">
+                </div>
+                <button id="loginBtn" class="btn">Sign In</button>
+                <p id="loginFeedback" class="feedback error"></p>
+                <p id="showRegister" class="toggle-link">Create new admin account</p>
+            </div>
+        </div>
+
+        <div id="registerSection" class="auth-container hidden">
+            <div class="card">
+                <h1>New Admin</h1>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="registerEmail" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="registerPassword" class="form-control">
+                </div>
+                <button id="registerBtn" class="btn btn-outline">Register</button>
+                <p id="registerFeedback" class="feedback"></p>
+                <p id="showLogin" class="toggle-link">Back to Login</p>
+            </div>
+        </div>
+
+        <div id="dashboardSection" class="dashboard-container hidden">
+            <div class="card">
+                <div class="dash-header">
+                    <h2>Dashboard Overview</h2>
+                    <button id="logoutBtn" class="btn btn-danger btn-sm">Sign Out</button>
+                </div>
+                
+                <div class="action-bar">
+                    <button id="fetchUsersBtn" class="btn btn-outline">Users Management</button>
+                    <button id="fetchKeysBtn" class="btn btn-outline">API Keys Status</button>
+                </div>
+
+                <div id="dataContainer">
+                    <p style="text-align:center; opacity: 0.5;">Select an option above to view data.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- LOGIC TETAP SAMA ---
+        const loginSection = document.getElementById('loginSection');
+        const registerSection = document.getElementById('registerSection');
+        const dashboardSection = document.getElementById('dashboardSection');
+        
+        const loginBtn = document.getElementById('loginBtn');
+        const adminEmailInput = document.getElementById('adminEmail');
+        const adminPasswordInput = document.getElementById('adminPassword');
+        const loginFeedback = document.getElementById('loginFeedback');
+        
+        const registerBtn = document.getElementById('registerBtn');
+        const registerEmailInput = document.getElementById('registerEmail');
+        const registerPasswordInput = document.getElementById('registerPassword');
+        const registerFeedback = document.getElementById('registerFeedback');
+
+        const showRegister = document.getElementById('showRegister');
+        const showLogin = document.getElementById('showLogin');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const fetchUsersBtn = document.getElementById('fetchUsersBtn');
+        const fetchKeysBtn = document.getElementById('fetchKeysBtn');
+        const dataContainer = document.getElementById('dataContainer');
+
+        function showLoginForm() {
+            loginSection.classList.remove('hidden');
+            registerSection.classList.add('hidden');
+            loginFeedback.textContent = '';
+        }
+        
+        function showRegisterForm() {
+            loginSection.classList.add('hidden');
+            registerSection.classList.remove('hidden');
+            registerFeedback.textContent = '';
+        }
+
+        async function handleLogin() {
+            const email = adminEmailInput.value;
+            const password = adminPasswordInput.value;
+            loginFeedback.textContent = 'Authenticating...';
+            try {
+                const response = await fetch('/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                if (!response.ok) throw new Error('Login Failed');
+                
+                loginSection.classList.add('hidden');
+                dashboardSection.classList.remove('hidden');
+                loginFeedback.textContent = '';
+            } catch (error) {
+                loginFeedback.textContent = error.message;
+            }
+        }
+
+        async function handleRegister() {
+            const email = registerEmailInput.value;
+            const password = registerPasswordInput.value;
+            try {
+                const response = await fetch('/admin/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                if (!response.ok) throw new Error('Registration Failed');
+                
+                registerFeedback.textContent = 'Success! Please login.';
+                registerFeedback.className = 'feedback success';
+                setTimeout(showLoginForm, 1500);
+            } catch (error) {
+                registerFeedback.textContent = error.message;
+                registerFeedback.className = 'feedback error';
+            }
+        }
+
+        function handleLogout() {
+            dashboardSection.classList.add('hidden');
+            showLoginForm();
+            dataContainer.innerHTML = '';
+        }
+
+        async function fetchUsers() {
+            dataContainer.innerHTML = '<p style="text-align:center;">Loading users...</p>';
+            try {
+                const response = await fetch('/admin/users'); 
+                const users = await response.json();
+                
+                let html = '<div class="table-responsive"><table>';
+                html += `<thead><tr><th>ID</th><th>User</th><th>Email</th><th>Keys (Preview)</th><th>Action</th></tr></thead><tbody>`;
+                
+                users.forEach(user => {
+                    const keys = user.ApiKeys.length > 0 
+                        ? user.ApiKeys.map(k => `<div><code>${k.key.substring(0, 8)}...</code></div>`).join('') 
+                        : '<span style="opacity:0.5;">None</span>';
+
+                    html += `<tr>
+                        <td>${user.id}</td>
+                        <td><strong>${user.first_name}</strong> ${user.last_name || ''}</td>
+                        <td>${user.email}</td>
+                        <td>${keys}</td>
+                        <td><button class="btn btn-danger btn-sm delete-user-btn" data-id="${user.id}">Delete</button></td>
+                    </tr>`;
+                });
+                html += '</tbody></table></div>';
+                dataContainer.innerHTML = html;
+            } catch (error) {
+                dataContainer.innerHTML = `<p class="feedback error">${error.message}</p>`;
+            }
+        }
+        
+        async function fetchApiKeys() {
+            dataContainer.innerHTML = '<p style="text-align:center;">Loading keys...</p>';
+            try {
+                const response = await fetch('/admin/apikeys'); 
+                const keys = await response.json();
+                
+                let html = '<div class="table-responsive"><table>';
+                html += `<thead><tr><th>Key</th><th>Owner</th><th>Status</th><th>Expires</th></tr></thead><tbody>`;
+                
+                keys.forEach(key => {
+                    const badgeClass = key.status === 'active' ? 'badge-active' : 'badge-inactive';
+                    const dateStr = new Date(key.out_of_date).toLocaleDateString();
+                    html += `<tr>
+                        <td><code>${key.key}</code></td>
+                        <td>${key.user_email || 'Unknown'}</td>
+                        <td><span class="badge ${badgeClass}">${key.status.toUpperCase()}</span></td>
+                        <td>${dateStr}</td>
+                    </tr>`;
+                });
+                html += '</tbody></table></div>';
+                dataContainer.innerHTML = html;
+            } catch (error) {
+                dataContainer.innerHTML = `<p class="feedback error">${error.message}</p>`;
+            }
+        }
+        
+        async function handleDeleteUser(event) {
+            if (!event.target.classList.contains('delete-user-btn')) return;
+            if (!confirm('Delete this user and all their keys?')) return;
+            
+            const userId = event.target.dataset.id;
+            try {
+                await fetch(`/admin/users/${userId}`, { method: 'DELETE' });
+                fetchUsers(); 
+            } catch (e) { alert(e.message); }
+        }
+
+        loginBtn.addEventListener('click', handleLogin);
+        registerBtn.addEventListener('click', handleRegister);
+        logoutBtn.addEventListener('click', handleLogout);
+        showRegister.addEventListener('click', showRegisterForm);
+        showLogin.addEventListener('click', showLoginForm);
+        fetchUsersBtn.addEventListener('click', fetchUsers);
+        fetchKeysBtn.addEventListener('click', fetchApiKeys);
+        dataContainer.addEventListener('click', handleDeleteUser);
+    </script>
+</body>
+</html>
